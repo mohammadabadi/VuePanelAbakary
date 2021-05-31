@@ -9,7 +9,7 @@ import JwtService from "@/core/services/jwt.service";
 const ApiService = {
     init() {
         Vue.use(VueAxios, axios);
-        Vue.axios.defaults.baseURL = "https://service.abakary.ir/api/";
+        Vue.axios.defaults.baseURL = "http://localhost:8085/api/";
     },
 
     /**
