@@ -63,7 +63,7 @@ const actions = {
     [LOGOUT](context) {
         return new Promise((resolve, reject) => {
             ApiService.setHeader();
-            ApiService.post("Accounts/SignOut")
+            ApiService.post("Account/SignOut")
                 .then(({ data }) => {
                     context.commit(PURGE_AUTH);
                     resolve(data);
@@ -91,7 +91,7 @@ const actions = {
     [VERIFY_AUTH](context) {
         if (JwtService.getToken() && JwtService.getId()) {
             ApiService.setHeader();
-            ApiService.get("Accounts", JwtService.getId())
+            ApiService.post("Account", JwtService.getId())
                 .then(({ data }) => {
                     context.commit(SET_VERIFY, data);
                 })

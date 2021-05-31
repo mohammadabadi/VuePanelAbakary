@@ -171,9 +171,9 @@ export default {
     getListTable() {
           return new Promise(resolve => {
             ApiService.setHeader();
-            ApiService.get("Group")
+            ApiService.post("Group/GetGroups")
                 .then(({ data }) => {
-                   this.items = data.value;
+                   this.items = data;
                 })
                 .catch(({ response }) => {
                     if (response == undefined){
@@ -210,7 +210,7 @@ export default {
                 .catch(({ response }) => {
                    Swal.fire({
                       title: "",
-                      text: response.data.value,
+                      text: response.data,
                       icon: "error",
                     });
                 });
