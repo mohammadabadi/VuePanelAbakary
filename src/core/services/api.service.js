@@ -2,6 +2,7 @@ import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import JwtService from "@/core/services/jwt.service";
+import VueRouter from "vue-router";
 
 /**
  * Service to call HTTP request via Axios
@@ -19,6 +20,7 @@ const ApiService = {
         Vue.axios.defaults.headers.common[
             "Authorization"
         ] = `Bearer  ${JwtService.getToken()}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
     },
     query(resource, params) {
         return Vue.axios.get(resource, params).catch(error => {
@@ -93,6 +95,23 @@ const ApiService = {
             // console.log(error);
             throw new Error(`[RWV] ApiService ${error}`);
         });
+    },
+    /**
+     * Redirect To Login Page
+     * @param evt
+     * @returns {*}
+     */
+    redirectToLogin(evt) {
+        evt.$router.push({ name: 'login' })
+    },
+    /**
+     * if Error No Equal 401 Redirect To Login
+     * @param {*} errorNo 
+     */
+    unauthorizedUser(errorNo, evt) {
+        if (errorNo == 401) {
+            this.redirectToLogin(evt);
+        }
     }
 };
 

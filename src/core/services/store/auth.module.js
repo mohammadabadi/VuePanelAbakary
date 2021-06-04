@@ -36,7 +36,6 @@ const getters = {
 const actions = {
     [LOGIN](context, credentials) {
         return new Promise(resolve => {
-            debugger;
             ApiService.post("Account/SignIn", credentials)
                 .then(({ data }) => {
                     var account = data;
@@ -137,7 +136,6 @@ const mutations = {
         state.errors = error;
     },
     [SET_AUTH](state, user) {
-        debugger;
         state.isAuthenticated = true;
         state.user = user;
         state.errors = {};

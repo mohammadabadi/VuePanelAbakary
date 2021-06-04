@@ -7,7 +7,9 @@
             <h3 class="card-label">گروه ها</h3>
           </div>
           <div class="card-title float-left">
-            <b-button variant="primary" v-b-modal.modal-1> <i class="la la-plus"></i>افزودن گروه</b-button>
+            <b-button variant="primary" v-b-modal.modal-1>
+              <i class="la la-plus"></i>افزودن گروه</b-button
+            >
 
             <b-modal hide-footer id="modal-1" title="افزودن گروه محصولات">
               <div class="p-4">
@@ -49,13 +51,16 @@
                     class="m-2 float-left"
                     type="submit"
                     variant="success"
-                    >
+                  >
                     <i class="la la-check"></i>
                     ذخیره</b-button
                   >
-                  <b-button class="m-2 float-left" type="reset" variant="danger"
-                    >
-                      <i class="la la-close"></i>
+                  <b-button
+                    class="m-2 float-left"
+                    type="reset"
+                    variant="danger"
+                  >
+                    <i class="la la-close"></i>
                     پاک کردن فرم</b-button
                   >
                 </b-form>
@@ -64,47 +69,61 @@
           </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-              <table
-                class="table table-head-custom table-head-bg table-borderless table-vertical-center"
-              >
-                <thead>
-                  <tr class="text-right text-uppercase">
-                    <th class="text-center">ردیف</th>
-                    <th class="text-center">عنوان گروه</th>
-                    <th class="text-center">توضیحات</th>
-                    <th class="text-center">عملیات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="text-center" v-for="item in items" :key="item.id">
-                    <td>
-                      {{ item.id }}
-                    </td>
-                    <td>
-                      {{ item.name }}
-                    </td>
-                    <td>
-                      {{ item.description }}
-                    </td>
-                    <td>
-                      <a
-                        @click="deleteItem(item.id)"
-                        class="btn btn-icon btn-light btn-sm"
-                      >
-                        <span class="svg-icon svg-icon-md svg-icon-primary">
-                          <!--begin::Svg Icon-->
-                          <inline-svg
-                            src="media/svg/icons/General/Trash.svg"
-                          ></inline-svg>
-                          <!--end::Svg Icon-->
-                        </span>
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-responsive">
+            <table
+              class="table table-head-custom table-head-bg table-borderless table-vertical-center"
+            >
+              <thead>
+                <tr class="text-right text-uppercase">
+                  <th class="text-center">ردیف</th>
+                  <th class="text-center">عنوان گروه</th>
+                  <th class="text-center">توضیحات</th>
+                  <th class="text-center">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="text-center" v-for="item in items" :key="item.id">
+                  <td>
+                    {{ item.id }}
+                  </td>
+                  <td>
+                    {{ item.name }}
+                  </td>
+                  <td>
+                    {{ item.description }}
+                  </td>
+                  <td>
+                    <a
+                      @click="deleteItem(item.id)"
+                      class="btn btn-icon btn-light btn-sm"
+                    >
+                      <span class="svg-icon svg-icon-md svg-icon-primary">
+                        <!--begin::Svg Icon-->
+                        <inline-svg
+                          src="media/svg/icons/General/Trash.svg"
+                        ></inline-svg>
+                        <!--end::Svg Icon-->
+                      </span>
+                    </a>
+
+                    <a
+                      @click="getRow(item.id)"
+                      class="btn btn-icon btn-light btn-sm"
+                      style="margin-right: 10px"
+                    >
+                      <span class="svg-icon svg-icon-md svg-icon-primary">
+                        <!--begin::Svg Icon-->
+                        <inline-svg
+                          src="media/svg/icons/General/Edit.svg"
+                        ></inline-svg>
+                        <!--end::Svg Icon-->
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -127,34 +146,85 @@ export default {
         description: "",
         published: true,
       },
+      defaultSearch: {
+        page: {
+          currentPage: 0,
+          pageLength: 0,
+        },
+        searches: {
+          searchAll: "",
+          searches: [],
+        },
+        orders: [],
+      },
       show: true,
     };
   },
   name: "group",
   components: {},
   methods: {
+    getRow(id) {
+      return new Promise((resolve) => {
+        ApiService.get("Group", id)
+          .then(({ data }) => {})
+          .catch(({ response }) => {
+            if (response == undefined) {
+              Swal.fire({
+                title: "",
+                text: "گروهی تعریف نشده است",
+                icon: "error",
+              });
+            }
+          });
+      });
+    },
     onSubmit(evt) {
       evt.preventDefault();
-         return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.post("Group/Add", this.form)
-                .then(({ data }) => {
-                      Swal.fire({
-                        title: "",
-                        text: "گروه با موفقیت افزوده شد",
-                        icon: "success",
-                      });
-                      this.onReset(evt);
-                      this.getListTable();
-                })
-                .catch(({ response }) => {
-                      Swal.fire({
-                        title: "",
-                        text: response.data.Message,
-                        icon: "error",
-                      });
-                });
+      if (evt.id == 0) {
+        return new Promise((resolve) => {
+          ApiService.setHeader();
+          ApiService.post("Group/Add", this.form)
+            .then(({ data }) => {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت افزوده شد",
+                icon: "success",
+              });
+              this.onReset(evt);
+              this.getListTable();
+            })
+            .catch(({ response }) => {
+              ApiService.unauthorizedUser(response.status, this);
+              Swal.fire({
+                title: "",
+                text: response.data.Message,
+                icon: "error",
+              });
             });
+        });
+      } else {
+        return new Promise((resolve) => {
+          ApiService.setHeader();
+          ApiService.post("Group/Edit", this.form)
+            .then(({ data }) => {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت ویرایش شد",
+                icon: "success",
+              });
+              this.onReset(evt);
+              this.getListTable();
+            })
+            .catch(({ response }) => {
+              ApiService.unauthorizedUser(response.status, this);
+              Swal.fire({
+                title: "",
+                text: response.data.Message,
+                icon: "error",
+              });
+            });
+        });
+      }
     },
     onReset(evt) {
       evt.preventDefault();
@@ -169,52 +239,55 @@ export default {
       });
     },
     getListTable() {
-          return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.post("Group/GetGroups")
-                .then(({ data }) => {
-                   this.items = data;
-                })
-                .catch(({ response }) => {
-                    if (response == undefined){
-                    Swal.fire({
-                      title: "",
-                      text: "گروهی تعریف نشده است",
-                      icon: "error",
-                    });
-                    }
-                });
-            });
+      return new Promise((resolve) => {
+        ApiService.setHeader();
+        ApiService.post("Group/GetGroups", this.defaultSearch)
+          .then(({ data }) => {
+            this.items = data.data;
+          })
+          .catch(({ response }) => {
+            if (response == undefined) {
+              Swal.fire({
+                title: "",
+                text: "گروهی تعریف نشده است",
+                icon: "error",
+              });
+            } else {
+              ApiService.unauthorizedUser(response.status, this);
+            }
+          });
+      });
     },
     deleteItem(id) {
-         return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.post("Group/Delete?id="+ id)
-                .then(({ data }) => {
-                   if (id == data.value) {
-                    Swal.fire({
-                      title: "",
-                      text: "گروه با موفقیت حذف شد",
-                      icon: "success",
-                    });
-                    this.getListTable();
-                    setTimeout(this.getListTable(), 5000);
-                  } else {
-                    Swal.fire({
-                      title: "",
-                      text: "گروه مورد نظر یافت نشد",
-                      icon: "error",
-                    });
-                  }
-                })
-                .catch(({ response }) => {
-                   Swal.fire({
-                      title: "",
-                      text: response.data,
-                      icon: "error",
-                    });
-                });
+      return new Promise((resolve) => {
+        ApiService.setHeader();
+        ApiService.post("Group/Delete?id=" + id)
+          .then(({ data }) => {
+            if (id == data) {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت حذف شد",
+                icon: "success",
+              });
+              this.getListTable();
+              setTimeout(this.getListTable(), 5000);
+            } else {
+              Swal.fire({
+                title: "",
+                text: "گروه مورد نظر یافت نشد",
+                icon: "error",
+              });
+            }
+          })
+          .catch(({ response }) => {
+            ApiService.unauthorizedUser(response.status, this);
+            Swal.fire({
+              title: "",
+              text: response.data,
+              icon: "error",
             });
+          });
+      });
     },
   },
   mounted() {
