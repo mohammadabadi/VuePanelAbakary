@@ -71,7 +71,13 @@
         <div class="card-body">
           <div class="table-responsive">
             <table
-              class="table table-head-custom table-head-bg table-borderless table-vertical-center"
+              class="
+                table
+                table-head-custom
+                table-head-bg
+                table-borderless
+                table-vertical-center
+              "
             >
               <thead>
                 <tr class="text-right text-uppercase">
@@ -110,7 +116,7 @@
                       @click="getRow(item.id)"
                       class="btn btn-icon btn-light btn-sm"
                       style="margin-right: 10px"
-                    >
+                    v-b-modal.modal-1>
                       <span class="svg-icon svg-icon-md svg-icon-primary">
                         <!--begin::Svg Icon-->
                         <inline-svg
@@ -165,8 +171,11 @@ export default {
   methods: {
     getRow(id) {
       return new Promise((resolve) => {
-        ApiService.get("Group", id)
-          .then(({ data }) => {})
+        ApiService.get("Group",id)
+          .then(({ data }) => {
+            this.form = data;
+            console.log(this.form);
+          })
           .catch(({ response }) => {
             if (response == undefined) {
               Swal.fire({
@@ -236,6 +245,7 @@ export default {
       this.show = false;
       this.$nextTick(() => {
         this.show = true;
+        this.$root.$emit('bv::hide::modal', 'modal-1', '#btnShow')
       });
     },
     getListTable() {
