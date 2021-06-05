@@ -116,7 +116,8 @@
                       @click="getRow(item.id)"
                       class="btn btn-icon btn-light btn-sm"
                       style="margin-right: 10px"
-                    v-b-modal.modal-1>
+                      v-b-modal.modal-1
+                    >
                       <span class="svg-icon svg-icon-md svg-icon-primary">
                         <!--begin::Svg Icon-->
                         <inline-svg
@@ -152,7 +153,7 @@ export default {
         description: "",
         published: true,
       },
-      defaultSearch: {
+      Search: {
         page: {
           currentPage: 0,
           pageLength: 0,
@@ -166,12 +167,13 @@ export default {
       show: true,
     };
   },
+  computed: {},
   name: "group",
-  components: {},
+   component: () => import ("@/view/components/table.vue"),
   methods: {
     getRow(id) {
       return new Promise((resolve) => {
-        ApiService.get("Group",id)
+        ApiService.get("Group", id)
           .then(({ data }) => {
             this.form = data;
             console.log(this.form);
@@ -180,7 +182,7 @@ export default {
             if (response == undefined) {
               Swal.fire({
                 title: "",
-                text: "گروهی تعریف نشده است",
+                text: response.data,
                 icon: "error",
               });
             }
@@ -189,7 +191,7 @@ export default {
     },
     onSubmit(evt) {
       evt.preventDefault();
-      if (evt.id == 0) {
+      if (evt.id == 0 || evt.id == undefined) {
         return new Promise((resolve) => {
           ApiService.setHeader();
           ApiService.post("Group/Add", this.form)
@@ -206,7 +208,7 @@ export default {
               ApiService.unauthorizedUser(response.status, this);
               Swal.fire({
                 title: "",
-                text: response.data.Message,
+                text: response.data,
                 icon: "error",
               });
             });
@@ -214,6 +216,7 @@ export default {
       } else {
         return new Promise((resolve) => {
           ApiService.setHeader();
+          debugger;
           ApiService.post("Group/Edit", this.form)
             .then(({ data }) => {
               Swal.fire({
@@ -245,13 +248,13 @@ export default {
       this.show = false;
       this.$nextTick(() => {
         this.show = true;
-        this.$root.$emit('bv::hide::modal', 'modal-1', '#btnShow')
+        this.$root.$emit("bv::hide::modal", "modal-1", "#btnShow");
       });
     },
     getListTable() {
       return new Promise((resolve) => {
         ApiService.setHeader();
-        ApiService.post("Group/GetGroups", this.defaultSearch)
+        ApiService.post("Group/GetGroups", this.Search)
           .then(({ data }) => {
             this.items = data.data;
           })
