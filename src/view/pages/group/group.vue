@@ -35,18 +35,6 @@
                     rows="3"
                     max-rows="6"
                   ></b-form-textarea>
-                  <!-- <div class="pt-4 pb-4">
-                    <b-form-group id="input-group-4">
-                      <b-form-checkbox-group
-                        v-model="form.published"
-                        id="checkboxes-4"
-                      >
-                        <b-form-checkbox value="false"
-                          >عدم نمایش دسته</b-form-checkbox
-                        >
-                      </b-form-checkbox-group>
-                    </b-form-group>
-                  </div> -->
                   <b-button
                     class="m-2 float-left"
                     type="submit"
@@ -69,68 +57,18 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table
-              class="
-                table
-                table-head-custom
-                table-head-bg
-                table-borderless
-                table-vertical-center
-              "
-            >
-              <thead>
-                <tr class="text-right text-uppercase">
-                  <th class="text-center">ردیف</th>
-                  <th class="text-center">عنوان گروه</th>
-                  <th class="text-center">توضیحات</th>
-                  <th class="text-center">عملیات</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="text-center" v-for="item in items" :key="item.id">
-                  <td>
-                    {{ item.id }}
-                  </td>
-                  <td>
-                    {{ item.name }}
-                  </td>
-                  <td>
-                    {{ item.description }}
-                  </td>
-                  <td>
-                    <a
-                      @click="deleteItem(item.id)"
-                      class="btn btn-icon btn-light btn-sm"
-                    >
-                      <span class="svg-icon svg-icon-md svg-icon-primary">
-                        <!--begin::Svg Icon-->
-                        <inline-svg
-                          src="media/svg/icons/General/Trash.svg"
-                        ></inline-svg>
-                        <!--end::Svg Icon-->
-                      </span>
-                    </a>
-
-                    <a
-                      @click="getRow(item.id)"
-                      class="btn btn-icon btn-light btn-sm"
-                      style="margin-right: 10px"
-                      v-b-modal.modal-1
-                    >
-                      <span class="svg-icon svg-icon-md svg-icon-primary">
-                        <!--begin::Svg Icon-->
-                        <inline-svg
-                          src="media/svg/icons/General/Edit.svg"
-                        ></inline-svg>
-                        <!--end::Svg Icon-->
-                      </span>
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <TableCore
+            :Columns="Columns"
+            :databaseColumns="databaseColumns"
+            :Rows="this.getListTable2"
+            :showSearch="true"
+            :showOrder="true"
+            :showButtons="true"
+            :showPage="true"
+            :showRowNumber="true"
+            @onEditedRow="onEditedRow($event)"
+            @onDeletedRow="onDeletedRow($event)"
+          ></TableCore>
         </div>
       </div>
     </div>
@@ -141,10 +79,13 @@ import { SET_BREADCRUMB } from "@/core/services/store/breadcrumbs.module";
 import Swal from "sweetalert2";
 // import axios from "axios";
 import ApiService from "@/core/services/api.service";
+import TableCore from "@/view/components/table.vue";
 
 export default {
   data() {
     return {
+      Columns: ["نام", "توضیحات"],
+      databaseColumns: ["name", "description"],
       items: {},
       form: {
         id: 0,
@@ -155,8 +96,9 @@ export default {
       },
       Search: {
         page: {
-          currentPage: 0,
-          pageLength: 0,
+          currentPage: 1,
+          pageLength: 100,
+          lastPage: 5,
         },
         searches: {
           searchAll: "",
@@ -169,14 +111,13 @@ export default {
   },
   computed: {},
   name: "group",
-   component: () => import ("@/view/components/table.vue"),
+  components: { TableCore },
   methods: {
     getRow(id) {
       return new Promise((resolve) => {
         ApiService.get("Group", id)
           .then(({ data }) => {
             this.form = data;
-            console.log(this.form);
           })
           .catch(({ response }) => {
             if (response == undefined) {
@@ -216,7 +157,6 @@ export default {
       } else {
         return new Promise((resolve) => {
           ApiService.setHeader();
-          debugger;
           ApiService.post("Group/Edit", this.form)
             .then(({ data }) => {
               Swal.fire({
@@ -271,6 +211,10 @@ export default {
           });
       });
     },
+    getListTable2(){
+      this.getListTable();
+      return this.items;
+    },
     deleteItem(id) {
       return new Promise((resolve) => {
         ApiService.setHeader();
@@ -301,6 +245,12 @@ export default {
             });
           });
       });
+    },
+    onEditedRow(evt) {
+      this.getRow(evt);
+    },
+    onDeletedRow(evt) {
+      this.deleteItem(evt);
     },
   },
   mounted() {

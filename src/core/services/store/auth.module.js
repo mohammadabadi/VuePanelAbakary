@@ -98,7 +98,7 @@ const actions = {
                 .catch(({ response }) => {
                     Swal.fire({
                         title: "",
-                        text: response.data.Message,
+                        text: response.data,
                         icon: "error",
                     });
                     // context.commit(SET_ERROR, response);
