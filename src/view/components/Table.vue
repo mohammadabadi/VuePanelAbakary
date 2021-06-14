@@ -81,7 +81,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, rowIndex) in Rows()" :key="rowIndex">
+          <tr v-for="(row, rowIndex) in Rows" :key="rowIndex">
             <td class="text-center" v-show="showRowNumber">
               {{ rowIndex + 1 }}
             </td>
@@ -144,7 +144,7 @@
         <button
           type="button"
           class="btn btn-icon btn-dark btn-sm"
-          v-for="count in 1"
+          v-for="count in filter.page.lastPage"
           :key="count"
         >
           {{ count }}
@@ -172,12 +172,15 @@ export default {
   props: {
     Columns: Array,
     databaseColumns: Array,
-    Rows: Function,
+    Rows: Array,
     showSearch: Boolean,
     showOrder: Boolean,
     showButtons: Boolean,
     showPage: Boolean,
     showRowNumber: Boolean,
+    filter: Object,
+  },
+  mounted() {
   },
   data() {
     return {

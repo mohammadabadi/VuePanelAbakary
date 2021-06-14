@@ -60,12 +60,13 @@
           <TableCore
             :Columns="Columns"
             :databaseColumns="databaseColumns"
-            :Rows="this.getListTable2"
+            :Rows="Object.keys(this.items).length === 0 ? null : this.items"
             :showSearch="true"
             :showOrder="true"
             :showButtons="true"
             :showPage="true"
             :showRowNumber="true"
+            :filter="this.Search"
             @onEditedRow="onEditedRow($event)"
             @onDeletedRow="onDeletedRow($event)"
           ></TableCore>
@@ -97,8 +98,8 @@ export default {
       Search: {
         page: {
           currentPage: 1,
-          pageLength: 100,
-          lastPage: 5,
+          pageLength: 2,
+          lastPage: 1,
         },
         searches: {
           searchAll: "",
@@ -197,6 +198,7 @@ export default {
         ApiService.post("Group/GetGroups", this.Search)
           .then(({ data }) => {
             this.items = data.data;
+            this.Search = data.filterSetting;
           })
           .catch(({ response }) => {
             if (response == undefined) {
@@ -210,10 +212,6 @@ export default {
             }
           });
       });
-    },
-    getListTable2(){
-      this.getListTable();
-      return this.items;
     },
     deleteItem(id) {
       return new Promise((resolve) => {
