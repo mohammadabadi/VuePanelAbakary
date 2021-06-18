@@ -59,7 +59,6 @@
         <div class="card-body">
           <TableCore
             :Columns="Columns"
-            :databaseColumns="databaseColumns"
             :Rows="Object.keys(this.items).length === 0 ? null : this.items"
             :showSearch="true"
             :showOrder="true"
@@ -69,6 +68,9 @@
             :filter="this.Search"
             @onEditedRow="onEditedRow($event)"
             @onDeletedRow="onDeletedRow($event)"
+            @onChangePageLength="onChangePageLength($event)"
+            @onChangePage="onChangePage($event)"
+            @onSearchAll="onSearchAll($event)"
           ></TableCore>
         </div>
       </div>
@@ -81,12 +83,15 @@ import Swal from "sweetalert2";
 // import axios from "axios";
 import ApiService from "@/core/services/api.service";
 import TableCore from "@/view/components/table.vue";
+import ErrorVue from "../error/Error.vue";
 
 export default {
   data() {
     return {
-      Columns: ["نام", "توضیحات"],
-      databaseColumns: ["name", "description"],
+      Columns: [
+        { columnName: "name", displayName: "نام" },
+        { columnName: "description", displayName: "توضیحات" },
+      ],
       items: {},
       form: {
         id: 0,
@@ -98,8 +103,8 @@ export default {
       Search: {
         page: {
           currentPage: 1,
-          pageLength: 2,
-          lastPage: 1,
+          pageLength: 100,
+          lastPage: 0,
         },
         searches: {
           searchAll: "",
@@ -197,6 +202,7 @@ export default {
         ApiService.setHeader();
         ApiService.post("Group/GetGroups", this.Search)
           .then(({ data }) => {
+            this.items = null;
             this.items = data.data;
             this.Search = data.filterSetting;
           })
@@ -250,8 +256,22 @@ export default {
     onDeletedRow(evt) {
       this.deleteItem(evt);
     },
+    onChangePageLength(evt) {
+      debugger;
+      this.Search.page.pageLength = parseInt(evt);
+      this.getListTable();
+    },
+    onChangePage(evt) {
+      this.Search.page.currentPage = evt;
+      this.getListTable();
+    },
+    onSearchAll(evt) {
+      this.Search.searches.searchAll = evt;
+      this.getListTable();
+    },
   },
   mounted() {
+    console.log(this.Columns);
     this.$store.dispatch(SET_BREADCRUMB, [{ title: "گروه ها" }]);
     this.getListTable();
   },
