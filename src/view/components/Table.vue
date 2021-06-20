@@ -48,6 +48,7 @@
               class="text-center"
               v-for="(column, index) in Columns"
               :key="index"
+              v-bind:id="column.columnName"
             >
               {{ column.displayName }}
               <!--begin::Svg Icon-->
@@ -60,8 +61,8 @@
                   height: 12px;
                   cursor: pointer;
                 "
-                @click="order"
-              >salam</inline-svg>
+                @click="onChangeOrder(column.columnName)"
+              ></inline-svg>
               <!--end::Svg Icon-->
             </th>
             <th class="text-center" v-show="showButtons">عملیات</th>
@@ -123,27 +124,15 @@
       aria-label="Toolbar with button groups"
       v-show="showPage"
     >
-      <!-- First Page -->
-      <div class="btn-group me-2" role="group">
-        <button
-          type="button"
-          class="btn btn-icon btn-secondary btn-sm"
-          style="width: 70px"
-          @click="onChangePage(1)"
-        >
-          اولین صفحه
-        </button>
-      </div>
-      <!-- First Page -->
       <div class="btn-group me-2" role="group">
         <button
           type="button"
           class="btn btn-icon btn-dark btn-sm"
-          v-for="count in filter.page.lastPage"
+          v-for="count in filter.page.lastPage <= 5 ? filter.page.lastPage : 5"
           :key="count"
-          @click="onChangePage(count)"
+          @click="onChangePage(count + firstPage)"
         >
-          {{ count }}
+          {{ count + firstPage }}
         </button>
       </div>
       <!-- Last Page -->
@@ -151,10 +140,10 @@
         <button
           type="button"
           class="btn btn-icon btn-secondary btn-sm"
-          style="width: 70px"
+          style="width: 120px"
           @click="onChangePage(filter.page.lastPage)"
         >
-          آخرین صفحه
+          آخرین صفحه ({{ filter.page.lastPage }})
         </button>
       </div>
       <!-- Last Page -->
@@ -194,40 +183,35 @@ export default {
     showRowNumber: Boolean,
     filter: Object,
   },
-  mounted() {
-    this.fillOrderListDefault();
-  },
+  mounted() {},
   updated() {},
   data() {
     return {
       show: true,
+      firstPage: 0,
       searchAll: "",
       Orders: [],
-      Order: {
-        columnName: "",
-        orderBy: 1,
-      },
       pageLength: 100,
     };
   },
   methods: {
-    onChangeOrder(columnName){
-
-    },
-    fillOrderListDefault() {
-      let i;
-
-      for (i = 0; i <= this.Columns.length - 1; i++) {
-        this.Orders.push({
-          columnName: this.Columns[i].columnName,
-          orderBy: 1,
-        });
-      }
-    },
     onChangePageLength() {
       this.$emit("onChangePageLength", this.pageLength);
     },
     onChangePage(evt) {
+      if (evt % 5 == 0) {
+        this.firstPage = evt;
+      } else {
+        this.firstPage = evt - 5 - 1;
+        if (this.firstPage < 0) {
+          this.firstPage = 0;
+        }
+      }
+      if (evt > this.filter.page.lastPage) {
+        this.filter.page.currentPage = this.filter.page.lastPage;
+        evt = this.filter.page.lastPage;
+        this.firstPage = this.filter.page.lastPage - 5;
+      }
       this.$emit("onChangePage", evt);
     },
     onSearchAll() {
@@ -236,7 +220,18 @@ export default {
     onEdit(evt) {
       this.$emit("onEditedRow", evt);
     },
-    onChangeOrder() {},
+    onChangeOrder(evt) {
+      let index = this.Orders.findIndex((x) => x.columnName === evt);
+      if (index == -1) {
+        this.Orders.push({
+          columnName: evt,
+          orderBy: 1,
+        });
+      } else {
+        this.Orders[index].orderBy = this.Orders[index].orderBy == 1 ? 2 : 1;
+      }
+      this.$emit("onOrderColumns", this.Orders);
+    },
     onDelete(evt) {
       Swal.fire({
         title: "",

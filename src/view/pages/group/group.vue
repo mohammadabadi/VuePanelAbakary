@@ -71,6 +71,7 @@
             @onChangePageLength="onChangePageLength($event)"
             @onChangePage="onChangePage($event)"
             @onSearchAll="onSearchAll($event)"
+            @onOrderColumns="onOrderColumns($event)"
           ></TableCore>
         </div>
       </div>
@@ -269,9 +270,12 @@ export default {
       this.Search.searches.searchAll = evt;
       this.getListTable();
     },
+    onOrderColumns(evt) {
+      this.Search.orders = evt;
+      this.getListTable();
+    },
   },
   mounted() {
-    console.log(this.Columns);
     this.$store.dispatch(SET_BREADCRUMB, [{ title: "گروه ها" }]);
     this.getListTable();
   },
