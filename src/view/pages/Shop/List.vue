@@ -4,7 +4,7 @@
       <div class="card card-custom gutter-b">
         <div class="card-header">
           <div class="card-title">
-            <h3 class="card-label">لیست محصولات</h3>
+            <h3 class="card-label">لیست فروشگاه ها</h3>
           </div>
         </div>
         <div class="card-body">
@@ -110,7 +110,7 @@ export default {
     getListTable() {
           return new Promise(resolve => {
             ApiService.setHeader();
-            ApiService.getList("GetProducts?ShopId=1")
+            ApiService.getList("Product?ShopId=1")
                 .then(({ data }) => {
                    this.products = data.value;
                 })

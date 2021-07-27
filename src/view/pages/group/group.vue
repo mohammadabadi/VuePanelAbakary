@@ -7,7 +7,9 @@
             <h3 class="card-label">گروه ها</h3>
           </div>
           <div class="card-title float-left">
-            <b-button variant="primary" v-b-modal.modal-1> <i class="la la-plus"></i>افزودن گروه</b-button>
+            <b-button variant="primary" v-b-modal.modal-1>
+              <i class="la la-plus"></i>افزودن گروه</b-button
+            >
 
             <b-modal hide-footer id="modal-1" title="افزودن گروه محصولات">
               <div class="p-4">
@@ -33,29 +35,20 @@
                     rows="3"
                     max-rows="6"
                   ></b-form-textarea>
-                  <!-- <div class="pt-4 pb-4">
-                    <b-form-group id="input-group-4">
-                      <b-form-checkbox-group
-                        v-model="form.published"
-                        id="checkboxes-4"
-                      >
-                        <b-form-checkbox value="false"
-                          >عدم نمایش دسته</b-form-checkbox
-                        >
-                      </b-form-checkbox-group>
-                    </b-form-group>
-                  </div> -->
                   <b-button
                     class="m-2 float-left"
                     type="submit"
                     variant="success"
-                    >
+                  >
                     <i class="la la-check"></i>
                     ذخیره</b-button
                   >
-                  <b-button class="m-2 float-left" type="reset" variant="danger"
-                    >
-                      <i class="la la-close"></i>
+                  <b-button
+                    class="m-2 float-left"
+                    type="reset"
+                    variant="danger"
+                  >
+                    <i class="la la-close"></i>
                     پاک کردن فرم</b-button
                   >
                 </b-form>
@@ -64,47 +57,22 @@
           </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-              <table
-                class="table table-head-custom table-head-bg table-borderless table-vertical-center"
-              >
-                <thead>
-                  <tr class="text-right text-uppercase">
-                    <th class="text-center">ردیف</th>
-                    <th class="text-center">عنوان گروه</th>
-                    <th class="text-center">توضیحات</th>
-                    <th class="text-center">عملیات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="text-center" v-for="item in items" :key="item.id">
-                    <td>
-                      {{ item.id }}
-                    </td>
-                    <td>
-                      {{ item.name }}
-                    </td>
-                    <td>
-                      {{ item.description }}
-                    </td>
-                    <td>
-                      <a
-                        @click="deleteItem(item.id)"
-                        class="btn btn-icon btn-light btn-sm"
-                      >
-                        <span class="svg-icon svg-icon-md svg-icon-primary">
-                          <!--begin::Svg Icon-->
-                          <inline-svg
-                            src="media/svg/icons/General/Trash.svg"
-                          ></inline-svg>
-                          <!--end::Svg Icon-->
-                        </span>
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <TableCore
+            :Columns="Columns"
+            :Rows="Object.keys(this.items).length === 0 ? null : this.items"
+            :showSearch="true"
+            :showOrder="true"
+            :showButtons="true"
+            :showPage="true"
+            :showRowNumber="true"
+            :filter="this.Search"
+            @onEditedRow="onEditedRow($event)"
+            @onDeletedRow="onDeletedRow($event)"
+            @onChangePageLength="onChangePageLength($event)"
+            @onChangePage="onChangePage($event)"
+            @onSearchAll="onSearchAll($event)"
+            @onOrderColumns="onOrderColumns($event)"
+          ></TableCore>
         </div>
       </div>
     </div>
@@ -115,10 +83,16 @@ import { SET_BREADCRUMB } from "@/core/services/store/breadcrumbs.module";
 import Swal from "sweetalert2";
 // import axios from "axios";
 import ApiService from "@/core/services/api.service";
+import TableCore from "@/view/components/table.vue";
+import ErrorVue from "../error/Error.vue";
 
 export default {
   data() {
     return {
+      Columns: [
+        { columnName: "name", displayName: "نام" },
+        { columnName: "description", displayName: "توضیحات" },
+      ],
       items: {},
       form: {
         id: 0,
@@ -127,34 +101,89 @@ export default {
         description: "",
         published: true,
       },
+      Search: {
+        page: {
+          currentPage: 1,
+          pageLength: 100,
+          lastPage: 0,
+        },
+        searches: {
+          searchAll: "",
+          searches: [],
+        },
+        orders: [],
+      },
       show: true,
     };
   },
+  computed: {},
   name: "group",
-  components: {},
+  components: { TableCore },
   methods: {
+    getRow(id) {
+      return new Promise((resolve) => {
+        ApiService.get("Group", id)
+          .then(({ data }) => {
+            this.form = data;
+          })
+          .catch(({ response }) => {
+            if (response == undefined) {
+              Swal.fire({
+                title: "",
+                text: response.data,
+                icon: "error",
+              });
+            }
+          });
+      });
+    },
     onSubmit(evt) {
       evt.preventDefault();
-         return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.post("Group/Add", this.form)
-                .then(({ data }) => {
-                      Swal.fire({
-                        title: "",
-                        text: "گروه با موفقیت افزوده شد",
-                        icon: "success",
-                      });
-                      this.onReset(evt);
-                      this.getListTable();
-                })
-                .catch(({ response }) => {
-                      Swal.fire({
-                        title: "",
-                        text: response.data.Message,
-                        icon: "error",
-                      });
-                });
+      if (evt.id == 0 || evt.id == undefined) {
+        return new Promise((resolve) => {
+          ApiService.setHeader();
+          ApiService.post("Group/Add", this.form)
+            .then(({ data }) => {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت افزوده شد",
+                icon: "success",
+              });
+              this.onReset(evt);
+              this.getListTable();
+            })
+            .catch(({ response }) => {
+              ApiService.unauthorizedUser(response.status, this);
+              Swal.fire({
+                title: "",
+                text: response.data,
+                icon: "error",
+              });
             });
+        });
+      } else {
+        return new Promise((resolve) => {
+          ApiService.setHeader();
+          ApiService.post("Group/Edit", this.form)
+            .then(({ data }) => {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت ویرایش شد",
+                icon: "success",
+              });
+              this.onReset(evt);
+              this.getListTable();
+            })
+            .catch(({ response }) => {
+              ApiService.unauthorizedUser(response.status, this);
+              Swal.fire({
+                title: "",
+                text: response.data.Message,
+                icon: "error",
+              });
+            });
+        });
+      }
     },
     onReset(evt) {
       evt.preventDefault();
@@ -166,55 +195,84 @@ export default {
       this.show = false;
       this.$nextTick(() => {
         this.show = true;
+        this.$root.$emit("bv::hide::modal", "modal-1", "#btnShow");
       });
     },
     getListTable() {
-          return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.get("Group")
-                .then(({ data }) => {
-                   this.items = data.value;
-                })
-                .catch(({ response }) => {
-                    if (response == undefined){
-                    Swal.fire({
-                      title: "",
-                      text: "گروهی تعریف نشده است",
-                      icon: "error",
-                    });
-                    }
-                });
-            });
+      return new Promise((resolve) => {
+        ApiService.setHeader();
+        ApiService.post("Group/GetGroups", this.Search)
+          .then(({ data }) => {
+            this.items = null;
+            this.items = data.data;
+            this.Search = data.filterSetting;
+          })
+          .catch(({ response }) => {
+            if (response == undefined) {
+              Swal.fire({
+                title: "",
+                text: "گروهی تعریف نشده است",
+                icon: "error",
+              });
+            } else {
+              ApiService.unauthorizedUser(response.status, this);
+            }
+          });
+      });
     },
     deleteItem(id) {
-         return new Promise(resolve => {
-            ApiService.setHeader();
-            ApiService.post("Group/Delete?id="+ id)
-                .then(({ data }) => {
-                   if (id == data.value) {
-                    Swal.fire({
-                      title: "",
-                      text: "گروه با موفقیت حذف شد",
-                      icon: "success",
-                    });
-                    this.getListTable();
-                    setTimeout(this.getListTable(), 5000);
-                  } else {
-                    Swal.fire({
-                      title: "",
-                      text: "گروه مورد نظر یافت نشد",
-                      icon: "error",
-                    });
-                  }
-                })
-                .catch(({ response }) => {
-                   Swal.fire({
-                      title: "",
-                      text: response.data.value,
-                      icon: "error",
-                    });
-                });
+      return new Promise((resolve) => {
+        ApiService.setHeader();
+        ApiService.post("Group/Delete?id=" + id)
+          .then(({ data }) => {
+            if (id == data) {
+              Swal.fire({
+                title: "",
+                text: "گروه با موفقیت حذف شد",
+                icon: "success",
+              });
+              this.getListTable();
+              setTimeout(this.getListTable(), 5000);
+            } else {
+              Swal.fire({
+                title: "",
+                text: "گروه مورد نظر یافت نشد",
+                icon: "error",
+              });
+            }
+          })
+          .catch(({ response }) => {
+            ApiService.unauthorizedUser(response.status, this);
+            Swal.fire({
+              title: "",
+              text: response.data,
+              icon: "error",
             });
+          });
+      });
+    },
+    onEditedRow(evt) {
+      this.getRow(evt);
+    },
+    onDeletedRow(evt) {
+      this.deleteItem(evt);
+    },
+    onChangePageLength(evt) {
+      debugger;
+      this.Search.page.pageLength = parseInt(evt);
+      this.getListTable();
+    },
+    onChangePage(evt) {
+      this.Search.page.currentPage = evt;
+      this.getListTable();
+    },
+    onSearchAll(evt) {
+      this.Search.searches.searchAll = evt;
+      this.getListTable();
+    },
+    onOrderColumns(evt) {
+      this.Search.orders = evt;
+      this.getListTable();
     },
   },
   mounted() {

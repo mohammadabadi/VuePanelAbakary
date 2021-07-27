@@ -205,7 +205,7 @@ export default {
     getCategory(evt) {
       return new Promise((resolve) => {
         ApiService.setHeader();
-        ApiService.get("Category")
+        ApiService.post("Category/GetCategories?ShopId=1")
           .then(({ data }) => {
             this.categoryOptions = data.value;
           })

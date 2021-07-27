@@ -328,7 +328,6 @@ export default {
       modalId = ''
     },
      hideModal(id) {
-      debugger;
       let modalId = this.$refs['my-modal' + id][0];
       console.log(modalId);
       modalId.isHidden = true;

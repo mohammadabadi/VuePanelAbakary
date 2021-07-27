@@ -36,10 +36,10 @@ const getters = {
 const actions = {
     [LOGIN](context, credentials) {
         return new Promise(resolve => {
-            ApiService.post("Accounts/SignIn", credentials)
+            ApiService.post("Account/SignIn", credentials)
                 .then(({ data }) => {
                     var account = data;
-                    if (account.value.signIn.succeeded == true) {
+                    if (account.signIn.succeeded == true) {
                         Swal.fire({
                             title: "",
                             text: "به داشبورد مدیریتی آباکاری خوش آمدید",
@@ -63,7 +63,7 @@ const actions = {
     [LOGOUT](context) {
         return new Promise((resolve, reject) => {
             ApiService.setHeader();
-            ApiService.post("Accounts/SignOut")
+            ApiService.post("Account/SignOut")
                 .then(({ data }) => {
                     context.commit(PURGE_AUTH);
                     resolve(data);
@@ -91,14 +91,14 @@ const actions = {
     [VERIFY_AUTH](context) {
         if (JwtService.getToken() && JwtService.getId()) {
             ApiService.setHeader();
-            ApiService.get("Accounts", JwtService.getId())
+            ApiService.get("Account", JwtService.getId())
                 .then(({ data }) => {
                     context.commit(SET_VERIFY, data);
                 })
                 .catch(({ response }) => {
                     Swal.fire({
                         title: "",
-                        text: response.data.Message,
+                        text: response.data,
                         icon: "error",
                     });
                     // context.commit(SET_ERROR, response);
@@ -139,17 +139,17 @@ const mutations = {
         state.isAuthenticated = true;
         state.user = user;
         state.errors = {};
-        JwtService.saveId(state.user.value.userId);
-        JwtService.saveToken(state.user.value.token);
+        JwtService.saveId(state.user.userId);
+        JwtService.saveToken(state.user.token);
 
     },
     [SET_VERIFY](state, user) {
         state.isAuthenticated = true;
         state.user = user;
-        JwtService.saveName(state.user.value.name);
-        JwtService.saveLName(state.user.value.family);
-        JwtService.saveUName(state.user.value.userName);
-        JwtService.savePhoneNumber(state.user.value.phoneNumber);
+        JwtService.saveName(state.user.name);
+        JwtService.saveLName(state.user.family);
+        JwtService.saveUName(state.user.userName);
+        JwtService.savePhoneNumber(state.user.phoneNumber);
         // state.errors = {};
         // JwtService.saveId(state.user.userId);
         // JwtService.saveToken(state.user.token);

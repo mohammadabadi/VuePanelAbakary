@@ -81,7 +81,7 @@ export default {
   name: "login",
   data() {
     return {
-        baseUrlApi: "https://service.abakary.ir/api",
+        baseUrlApi: "http://localhost:8085/api",
       // Remove this dummy login info
       form: {
         userName: "",
